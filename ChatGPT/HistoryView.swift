@@ -6,15 +6,60 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
 
 struct HistoryView: View {
+    
+    @State var messageHistory: [MessageLog] = []
+
+    private func fetchMessageHistory() {
+        let docRef = db.collection("messageHistory")
+                
+        docRef.getDocuments { (querySnapshot, err) in
+            if let err = err {
+                print("Error getting documents: \(err)")
+            } else {
+                for document in querySnapshot!.documents {
+                    do {
+                        
+                        self.messageHistory.append(try document.data(as: MessageLog.self))
+                    }
+                    catch {
+                        print(error)
+                    }
+                }
+            }
+        }
+
+    }
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+            List(messageHistory, id: \.id) { messages in
+                NavigationLink(destination: ChatView(messages: messages.messageLog)) {
+                    Text("1")
+                }
+            }.onAppear() {
+                fetchMessageHistory()
+            }
+            .onDisappear() {
+                messageHistory = []
+            }
+        }.navigationTitle("History")
+        
     }
 }
 
-struct HistoryView_Previews: PreviewProvider {
-    static var previews: some View {
-        HistoryView()
+struct ChatView: View {
+    var messages: [Message]
+    
+    var body: some View {
+        List(messages, id: \.id) { message in
+            HStack {
+                Text(message.sender)
+                Text(message.text)
+            }
+        }.navigationTitle("1")
     }
 }
+

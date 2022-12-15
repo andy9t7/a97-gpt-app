@@ -10,26 +10,15 @@ import OpenAISwift
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-let openAPI = OpenAISwift(authToken: "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")
-let db = Firestore.firestore()
+let path = Bundle.main.path(forResource: "api-token", ofType: "txt") // file path for file "data.txt"
+let token = try! String(contentsOfFile: path!, encoding: String.Encoding.utf8)
 
+let openAPI = OpenAISwift(authToken: token)
+let db = Firestore.firestore()
 
 struct ContentView: View {
     @State private var messageText = ""
     @State private var showSheet = false
-    
-    struct Message: Codable, Hashable {
-        var id = UUID()
-        let sender: String
-        let text: String
-        
-    }
-    
-    struct MessageLog: Codable {
-        @DocumentID var id: String?
-        @ServerTimestamp var created: Date?
-        let messageLog: [Message]
-    }
     
     @State var messageLog: [Message] = [
         Message(sender: "gpt", text: "Hello, how can I help you?"),
@@ -44,7 +33,7 @@ struct ContentView: View {
     
     func getGptResult(input: String) {
         print(input)
-        openAPI.sendCompletion(with: input, model: .gpt3(.davinci), maxTokens: 4000, completionHandler: { result in
+        openAPI.sendCompletion(with: input, model: .gpt3(.davinci), maxTokens: 256, completionHandler: { result in
             switch result {
             case .success(let model):
                 print(String(describing: model.choices))
