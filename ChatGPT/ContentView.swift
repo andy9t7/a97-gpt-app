@@ -25,15 +25,18 @@ struct ContentView: View {
     ]
     
     func sendMessage() {
-        messageLog.append(Message(sender: "you", text: messageText))
-        let messageLogString = convertMessagesToString(messageLog: messageLog)
-        getGptResult(input: messageLogString)
-        messageText = ""
+        if messageText != "" {
+            messageLog.append(Message(sender: "you", text: messageText))
+            let messageLogString = convertMessagesToString(messageLog: messageLog)
+            getGptResult(input: messageLogString)
+            messageText = ""
+        }
+
     }
     
     func getGptResult(input: String) {
         print(input)
-        openAPI.sendCompletion(with: input, model: .gpt3(.davinci), maxTokens: 256, completionHandler: { result in
+        openAPI.sendCompletion(with: input, model: .gpt3(.davinci), maxTokens: 4000, completionHandler: { result in
             switch result {
             case .success(let model):
                 print(String(describing: model.choices))
